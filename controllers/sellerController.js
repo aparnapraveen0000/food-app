@@ -94,7 +94,7 @@ const sellerLogin=async(req,res,next)=>{
 const sellerProfile=async (req,res,next)=>{
 try{
   const sellerId=req.seller.id
-  const sellerData=await sellerModel.findById(sellerId)
+  const sellerData=await sellerModel.findById(sellerId).select("-password")
 
   res.json({data:sellerData,message:"seller profile fetched"})
   

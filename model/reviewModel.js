@@ -5,14 +5,14 @@ const reviewSchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'user',
             required: true,
         },
         
-        orderId: {
+        restaurantId: {
             type: Schema.Types.ObjectId,
-            ref: 'order', 
-            required: false,
+            ref: 'restaurant', 
+            required: true,
         },
         rating: {
             type: Number,
@@ -23,6 +23,7 @@ const reviewSchema = new Schema(
         comment: {
             type: String,
             trim:true,
+            default:""
         },
     },
     { timestamps: true }

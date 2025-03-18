@@ -34,9 +34,11 @@ const restaurantSchema= new Schema({
         type:Number,
         min:0,
         max:5,
+        default:0
       },
       hotelImage:{
         type:String,
+        default:"https://cdn-icons-png.flaticon.com/512/9425/9425755.png"
     
       }
 },

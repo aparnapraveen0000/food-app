@@ -1,5 +1,6 @@
 const mongoose=require('mongoose')
-const { Schema } = mongoose;
+const { Schema } = mongoose
+const userModel=require("../model/userModel.js")
 
 
 const orderItemSchema = new Schema({
@@ -23,7 +24,7 @@ const orderItemSchema = new Schema({
 const orderSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'user',
         required: true,
       },
       
@@ -32,7 +33,7 @@ const orderSchema = new Schema({
     orderStatus:{
         type:String,
         enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'],
-        default: 'pending',
+        default: 'confirmed',
         required:true,
     },
     discount:{

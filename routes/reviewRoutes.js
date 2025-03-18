@@ -1,16 +1,19 @@
 const express = require('express')
 const router = express.Router()
+const{createReview,getRestaurantReview,deleteReview,avgRating}=require("../controllers/reviewController")
+const{authUser}=require("../middlewares/authUser.js")
+
 
 // create a review
-router.post("/")
+router.put("/",authUser,createReview)
 
 // get all the review
-router.get("/get")
-
-// update a review
-router.put("/update/:reviewId")
+router.get("/get/:restaurantId",getRestaurantReview)
 
 // delete a review
-router.delete("/delete/:reviewId")
+router.delete("/delete/:reviewId",authUser,deleteReview)
+
+// to get avg rating
+router.get("/avgRating/:restaurantId",avgRating)
 
 module.exports=router

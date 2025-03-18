@@ -94,7 +94,7 @@ const adminLogin=async(req,res,next)=>{
 const adminProfile=async (req,res,next)=>{
 try{
   const adminId=req.admin.id
-  const adminData=await adminModel.findById(adminId)
+  const adminData=await adminModel.findById(adminId).select("-password")
 
   res.json({data:adminData,message:"admin profile fetched"})
   
@@ -134,6 +134,25 @@ catch (error) {
 }
 }
 
+const adminDeactivate=async(req,res,next)=>{
+  try {
+    
+    const adminId = req.admin.id; 
+
+    // Update the isActive status to false
+    const admin = await adminModel.findByIdAndUpdate(adminId, { isActive: false }, { new: true });
+
+    if (!admin) {
+      return res.status(404).json({ message: "admin not found" });
+    }
+
+    res.json({ message: "Account deactivated successfully", admin});
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+}
+
+
 
 const checkAdmin=async(req,res,next)=>{
   try{
@@ -148,4 +167,4 @@ const checkAdmin=async(req,res,next)=>{
 
 
 
-module.exports={adminSignup,adminLogin,adminProfile,updateAdminProfile,adminLogout,checkAdmin}
+module.exports={adminSignup,adminLogin,adminProfile,updateAdminProfile,adminLogout,adminDeactivate,checkAdmin}
