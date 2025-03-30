@@ -56,11 +56,15 @@ const createItem=async(req,res,next)=>{
 const updateItem=async(req,res,next)=>{
     try {
         // collect the all data and the id of item that need to be updated
-        const { itemName,description, price,category,itemAvailability,restaurant}=req.body
+        const { itemName,description, price,category,itemAvailability,restaurant,foodImage}=req.body
              const {itemId}=req.params
 
+             
+           const cloudinaryPic = await cloudinary.uploader.upload(req.file.path);
+           console.log(cloudinaryPic)
+
             //  updating the new value
-        const updateItem=await menuModel.findByIdAndUpdate(itemId,{ itemName,description, price,category,itemAvailability,restaurant},{new:true})
+        const updateItem=await menuModel.findByIdAndUpdate(itemId,{ itemName,description, price,category,itemAvailability,restaurant,foodImage:cloudinaryPic.url},{new:true})
         //    checking about the updation
         if (!updateItem) {
             return res.status(404).json({ success: false, message: "Item not found" });

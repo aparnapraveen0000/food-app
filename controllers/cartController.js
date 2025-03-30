@@ -5,8 +5,16 @@ const { authUser } = require("../middlewares/authUser.js");
 // Add item to cart
 const addToCart = async (req, res) => {
     try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Unauthorized access" });
+        }
+
         const userId = req.user.id;
         const { foodId, quantity } = req.body;
+
+        if (!foodId || !quantity || quantity <= 0) {
+            return res.status(400).json({ message: "Invalid foodId or quantity" });
+        }
 
         const foodItem = await menuModel.findById(foodId);
         if (!foodItem) {
@@ -30,9 +38,11 @@ const addToCart = async (req, res) => {
 
         res.status(200).json({ message: "Cart updated", data: cart });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Error in addToCart:", error);
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
+
 
 // Get user's cart
 const getCart = async (req, res) => {

@@ -13,7 +13,7 @@ router.post("/create",authSeller, upload.single("foodImage"),createItem)
 
 // Get All Menu Items 
 
-router.get("/get_all",authUser, getMenu)
+router.get("/get_all", getMenu)
 
 //  Get single menu Items 
 
@@ -22,7 +22,7 @@ router.get("/singleItem/:itemId",authUser,getSingleItem )
 
 // Update a Menu Item
 
-router.put("/update/:itemId",authSeller,updateItem)
+router.put("/update/:itemId",authSeller,upload.single("foodImage"),updateItem)
 
 // Delete a Menu Item 
 

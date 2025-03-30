@@ -100,5 +100,24 @@ const postRestaurant=async(req,res,next)=>{
                     
                 }
                 }
+                const getRestaurantsByMenuItem = async (req, res, next) => {
+                    try {
+                        const { itemId } = req.params;
+                
+                        // Find menu item to get associated restaurant
+                        const menuItem = await menuModel.findById(itemId).populate("restaurant");
+                
+                        if (!menuItem) {
+                            return res.status(404).json({ message: "Menu item not found" });
+                        }
+                
+                        res.status(200).json({ data: menuItem.restaurant, message: "Restaurants retrieved successfully" });
+                
+                    } catch (error) {
+                        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+                    }
+                };
+                
+                
 
-module.exports={getRestaurant,postRestaurant, updateRestaurant, deleteRestaurant, getMenuOfRestaurant}
+module.exports={getRestaurant,postRestaurant, updateRestaurant, deleteRestaurant, getMenuOfRestaurant, getRestaurantsByMenuItem }

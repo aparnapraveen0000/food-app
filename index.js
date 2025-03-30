@@ -1,15 +1,24 @@
+
+require('dotenv').config()
+
 const express = require('express')
 const app = express()
 const{connectDB}=require("./config/db.js")
 const {apiRouter}=require("./routes/path.js")
 var cookieParser = require('cookie-parser')
+var cors = require('cors')
 const port =process.env.PORT
-require('dotenv').config()
 
 connectDB()
+var corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+}
 
-app.use(express.json())
 app.use(cookieParser())
+app.use(express.json())
+app.use(cors(corsOptions))
 
 
 app.use("/api",apiRouter)
