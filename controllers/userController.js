@@ -36,7 +36,7 @@ const userSignup = async (req, res, next) => {
 
         // Set token as a cookie
         res.cookie("token", token, {
-            httpOnly: true, 
+            httpOnly: false, 
             secure: process.env.NODE_ENV === "production",
             sameSite: "None",
             expires: new Date(Date.now() + 60 * 60 * 1000) // 1-hour expiry
@@ -81,7 +81,7 @@ const userLogin = async (req, res, next) => {
 
         // Set token as a cookie
         res.cookie("token", token, {
-            httpOnly: true,
+            httpOnly: false,
             secure: process.env.NODE_ENV === "production",
             sameSite: "None",
             expires: new Date(Date.now() + 60 * 60 * 1000),
