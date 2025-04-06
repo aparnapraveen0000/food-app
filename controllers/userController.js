@@ -149,24 +149,6 @@ const userLogout = async (req, res, next) => {
     }
 };
 
-// Deactivate User
-const userDeactivate = async (req, res, next) => {
-    try {
-        const userId = req.user.id;
-
-        const user = await userModel.findByIdAndUpdate(userId, { isActive: false }, { new: true });
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        res.json({ message: "Account deactivated successfully", user });
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error });
-        console.log(error);
-    }
-};
-
 // Check User Authorization
 const checkUser = async (req, res, next) => {
     try {
@@ -182,6 +164,5 @@ module.exports = {
     userProfile, 
     updateUserProfile, 
     userLogout, 
-    userDeactivate, 
-    checkUser 
+   checkUser 
 };

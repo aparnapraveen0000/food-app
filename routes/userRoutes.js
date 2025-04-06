@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const{authUser}=require("../middlewares/authUser.js")
 
-const {userSignup,userLogin,userProfile,updateUserProfile,userLogout,userDeactivate,checkUser}=require("../controllers/userController.js")
+const {userSignup,userLogin,userProfile,updateUserProfile,userLogout,checkUser}=require("../controllers/userController.js")
 const { authSeller } = require('../middlewares/authSeller.js')
 
 // User Authentication
@@ -18,7 +18,6 @@ router.get("/getProfile",authUser,userProfile)
 
 router.put("/updateProfile",authUser,updateUserProfile)
 
-router.put("/deactivate",authSeller,userDeactivate)
 
 router.get("/check",authUser,checkUser)
 
