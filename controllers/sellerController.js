@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require("bcryptjs");
 const sellerModel=require("../model/sellerModel.js")
 const {generateToken}=require("../utils/token.js")
 
