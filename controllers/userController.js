@@ -52,21 +52,17 @@ const userSignup = async (req, res, next) => {
 // User Login
 const userLogin = async (req, res, next) => {
     try {
-        // Collect user data
         const { email, password } = req.body;
 
-        // Data validation
         if (!email || !password) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        // Check if user exists
         const userExist = await userModel.findOne({ email });
         if (!userExist) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Check password match
         const passwordMatch = bcrypt.compareSync(password, userExist.password);
         if (!passwordMatch) {
             return res.status(401).json({ message: "Invalid credentials" });
@@ -76,21 +72,23 @@ const userLogin = async (req, res, next) => {
             return res.status(403).json({ message: "User account is not active" });
         }
 
-        // Generate token
         const token = generateToken(userExist._id, "user");
 
-        // Set token as a cookie
         res.cookie("token", token, {
-            httpOnly: false,
+            httpOnly: false, // Set to false so frontend can access it if needed
             secure: process.env.NODE_ENV === "production",
             sameSite: "None",
             expires: new Date(Date.now() + 60 * 60 * 1000),
         });
 
-        // Send user data without password
         const userData = await userModel.findById(userExist._id).select("-password");
 
-        res.json({ data: userData, message: "Login successful" });
+        // Include token in the response
+        res.json({ 
+            data: userData, 
+            token: token, // Add token here
+            message: "Login successful" 
+        });
     } catch (error) {
         res.status(500).json({ message: error.message || "Internal server error" });
         console.log(error);

@@ -3,13 +3,13 @@ const User = require("../model/userModel");
 
 const authUser = async (req, res, next) => {
     try {
-        const token = req.cookies.token;  // ✅ Read token from cookies
+        const token = req.cookies.token;
+        console.log("Token from cookies:", token); // Debug the token
 
         if (!token) {
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        // Verify token
         const decoded = jwt.verify(token, process.env.JWT_KEY);
         req.user = await User.findById(decoded.id).select("-password");
 

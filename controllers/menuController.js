@@ -4,7 +4,7 @@ const cloudinary=require("../config/cloudinary.js")
 const getMenu=async(req,res,next)=>{
     try {
         // to get all menu items
-        const menuItems=await menuModel.find().select("-description -category")
+        const menuItems=await menuModel.find().select("-category")
         res.status(200).json({data:menuItems, message:"Menu items retrieved successfully" })
     } catch (error) {
         res.status(error.statusCode || 500).json({message:error.message||"internal server error"})

@@ -1,169 +1,106 @@
-const bcrypt = require('bcrypt')
-const userModel=require("../model/userModel.js")
-const {generateToken}=require("../utils/token.js")
+const cartModel = require("../model/cartModel.js");
+const menuModel = require("../model/menuModel.js");
+const { authUser } = require("../middlewares/authUser.js");
 
-const userSignup=async(req,res,next)=>{
-    try {
-  // collect user data
-   const{name,email,password,mobile,address,confirmPassword,profilePic}=req.body
 
-  //  data validation
-  if(!name||!email|| !password||!mobile||!address||!confirmPassword){
-   return res.status(400).json({message:"all fields required"})
-  }
-  //  check if alreary exist
+// Add item to cart
+const addToCart = async (req, res) => {
+  const { foodId, quantity } = req.body;
 
-  const userExist=await userModel.findOne({email:email})
-
-  if(userExist){
-    return res.status(400).json({message:"this user is alreay exist"})
-  }
-
-  // compair password and confir password
-  if(password!==confirmPassword){
-    return res.status(400).json({message:"password is not same"}) 
-  }
-// password hashing
-  const hashedPassword = bcrypt.hashSync(password,10)
-
-  // save to db
-  const newUser= new userModel({name,email,password:hashedPassword,mobile,address,confirmPassword,profilePic})
-  await newUser.save()
-
-  // generate token using id and role
-
-const token=generateToken(newUser._id,"user")
-res.cookie("token",token)
-
-res.json({data:newUser,message:"signup success"})
-
-}
-    
-  catch (error) {
-        res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
-        console.log(error)
-    }
-}
-
-const userLogin=async(req,res,next)=>{
-  try{
-    // collecting userdata
-    const{email,password,confirmPassword}=req.body
-     //  data validation
-   if(!email|| !password||!confirmPassword){
-   return res.status(400).json({message:"all fields required"})
-  }
-
-  if(password!==confirmPassword){
-    return res.status(400).json({message:"password is not same"}) 
-  }
-
- // user exist checking
-  const userExist=await userModel.findOne({email:email})
-  if(!userExist){
-    return res.status(404).json({message:" user not found"})
-  }
-
-  // password match with db
-  const passwordMatch =bcrypt.compareSync(password,userExist.password)
- if(!passwordMatch){
-  return res.status(401).json({message:"invalid credentials"})
- }
-
- if(!userExist.isActive){
-  return res.status(404).json({message:" user account is not active"})
- }
-
-  // generate token
-  const token=generateToken(userExist._id,"user")
-  res.cookie("token",token)
-  // to remove password from userExist and send other details to frontend
-  
-  delete userExist._doc.password
-  res.json({data:userExist,message:"login success"})
-
-  }
-
-  catch (error) {
-    res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
-    console.log(error)
-
-}
-}
-
-const userProfile=async (req,res,next)=>{
-try{
-  const userId=req.user.id
-  const userData=await userModel.findById(userId).select("-password")
-
-  res.json({data:userData,message:"user profile fetched"})
-  
-}catch (error) {
-    res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
-    console.log(error)
-
-}
-
-}
-
-const updateUserProfile=async (req,res,next)=>{
-try{
-  const{name,email,password,mobile,address,confirmPassword,profilePic}=req.body
-  const userId=req.user.id
-  const userData=await userModel.findByIdAndUpdate(userId,{name,email,password,mobile,address,confirmPassword,profilePic},{new:true})
-
-  res.json({data:userData,message:"user profile updated"})
-}
-catch (error) {
-  res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
-  console.log(error)
-
-}
-
-}
-
-const userLogout=async (req,res,next)=>{
-try{
-      res.clearCookie("token")
-      res.json({message:"user logout"})
-}
-catch (error) {
-  res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
-  console.log(error)
-
-}
-}
-
-const userDeactivate=async(req,res,next)=>{
   try {
-    
-    const userId = req.user.id; 
-
-    // Update the isActive status to false
-    const user = await userModel.findByIdAndUpdate(userId, { isActive: false }, { new: true });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!foodId || !quantity || quantity < 1) {
+      return res.status(400).json({ message: "Invalid foodId or quantity" });
     }
 
-    res.json({ message: "Account deactivated successfully", user });
+    let cart = await cartModel.findOne({ userId: req.user.id }); 
+    if (!cart) {
+      cart = new cartModel({ userId: req.user.id, items: [], totalPrice: 0 }); 
+    }
+
+    const existingItem = cart.items.find(
+      (item) => item.foodId.toString() === foodId
+    );
+
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      const menuItem = await menuModel.findById(foodId); 
+      if (!menuItem) {
+        return res.status(404).json({ message: "Food item not found" });
+      }
+      cart.items.push({
+        foodId,
+        quantity,
+        price: menuItem.price,
+      });
+    }
+
+    // Recalculate total
+    cart.totalPrice = cart.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+
+    await cart.save();
+    res.status(200).json({ message: "Item added to cart", cart });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ message: "Server error" });
   }
-}
+};
 
-// check user
+   
 
-const checkUser=async(req,res,next)=>{
-  try{
-     res.json({message:"user autherized"})
+// Get user's cart
+const getCart = async (req, res) => {
+  try {
+    const cart = await cartModel.findOne({ userId: req.user.id }).populate('items.foodId')
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+    res.json(cart);
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    res.status(500).json({ message: "Server error" });
   }
-  catch (error) {
-    res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
-     }
-}
+};
 
+// Remove item from cart
+const removeFromCart = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { foodId } = req.body;
 
+        const cart = await cartModel.findOne({ userId });
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found" });
+        }
 
+        cart.items = cart.items.filter(item => item.foodId.toString() !== foodId);
+        cart.totalPrice = cart.items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+        await cart.save();
 
-module.exports={userSignup,userLogin,userProfile,updateUserProfile,userLogout, userDeactivate,checkUser}
+        res.status(200).json({ message: "Item removed", data: cart });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Delete entire cart
+const deleteCart = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const cart = await cartModel.findOneAndDelete({ userId });
+
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found" });
+        }
+
+        res.status(200).json({ message: "Cart deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { addToCart, getCart, removeFromCart, deleteCart };

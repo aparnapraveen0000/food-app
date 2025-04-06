@@ -1,10 +1,15 @@
-const express = require('express')
-const router = express.Router()
+// const express = require('express');
+// const router = express.Router();
+// const { authUser } = require("../middlewares/authUser.js");
+// const { initiatePayment, confirmPayment, fetchPayments } = require('../controllers/paymentController.js');
 
-// Get payment status
-router.get("/status/:id")
+// // Initiate Razorpay payment
+// router.post("/create/:orderId", authUser, initiatePayment);
 
-// Process refunds
-router.post("/refund")
+// // Verify Razorpay payment
+// router.post("/verify", authUser, confirmPayment);
 
-module.exports=router
+// // Fetch all payments
+// router.get("/transaction", authUser, fetchPayments);
+
+// module.exports = router;

@@ -21,7 +21,7 @@ router.put("/update/:restaurantId",authSeller, updateRestaurant)
 // Remove a restaurant 
 router.delete("/delete/:restaurantId",authAdmin, deleteRestaurant)
 
-router.get("/menu-item/:itemId", getRestaurantsByMenuItem);
+router.get("/:restaurantId", getRestaurantsByMenuItem);
 
 
 module.exports=router
