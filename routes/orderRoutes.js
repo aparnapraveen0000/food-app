@@ -9,7 +9,7 @@ const{deleteOrder,updateOrder,getOrder,createOrder,getSingleOrder}=require("../c
 router.post("/create",authUser,createOrder)
 
 // get all order
-router.get("/get",authSeller,getOrder)
+router.get("/get",authUser,getOrder)
 
 // Get a single order by id
 router.get("/single/:orderId",authSeller,getSingleOrder)

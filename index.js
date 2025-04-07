@@ -11,10 +11,11 @@ const port =process.env.PORT
 
 connectDB()
 var corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'https://frontendfood-one.vercel.app'],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }
+
 
 app.use(cookieParser())
 app.use(express.json())
