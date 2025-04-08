@@ -48,14 +48,10 @@ res.json({data:newAdmin,message:"signup success"})
 const adminLogin=async(req,res,next)=>{
   try{
     // collecting admindata
-    const{email,password,confirmPassword}=req.body
+    const{email,password}=req.body
      //  data validation
-   if(!email|| !password||!confirmPassword){
+   if(!email|| !password){
    return res.status(400).json({message:"all fields required"})
-  }
-
-  if(password!==confirmPassword){
-    return res.status(400).json({message:"password is not same"}) 
   }
 
  // admin exist checking
