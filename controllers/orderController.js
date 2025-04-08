@@ -31,17 +31,22 @@ const createOrder= async (req, res,next) => {
     }
 }
 
-// Get all orders
-const getOrder= async (req, res,next) => {
+const getOrder = async (req, res) => {
     try {
-        const orders = await orderModel.find().populate("userId").populate("orderItems.itemNameId")
-
-        res.status(200).json({data: orders, message:"all orders got successfully"})
-
+      console.log("User from token:", req.user); //  log user
+      const orders = await orderModel.find({ userId: req.user._id })
+        .populate("userId", "username email")
+        .populate("orderItems.itemNameId", "name price");
+  
+      console.log("Orders found:", orders); //  log orders
+      res.status(200).json(orders);
     } catch (error) {
-        res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
+      console.error("Error in getOrder:", error);
+      res.status(500).json({ message: "Something went wrong", error });
     }
-}
+  };
+  
+  
 
 // Get a single order by ID
 const getSingleOrder= async (req, res,next) => {
