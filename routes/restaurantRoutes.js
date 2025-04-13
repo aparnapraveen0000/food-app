@@ -7,13 +7,15 @@ const router = express.Router()
 
 // Get all restaurants
 
-router.get("/",authAdmin,getRestaurant)
+router.get("/",authAdmin,authSeller,getRestaurant)
 
 // Get menu items of a restaurant
 router.get("/menu/:restaurantId",authUser, getMenuOfRestaurant)
 
 // Add a new restaurant
 router.post("/restaurant",authAdmin,authSeller,postRestaurant)
+
+
 
 // Update a restaurant's details
 router.put("/update/:restaurantId",authSeller, authAdmin, updateRestaurant)

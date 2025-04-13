@@ -5,7 +5,7 @@ const {generateToken}=require("../utils/token.js")
 const sellerSignup=async(req,res,next)=>{
     try {
   // collect seller data
-   const{name,email,password,mobile,address,confirmPassword,businessName,profilePic}=req.body
+   const{name,email,password,mobile,address,confirmPassword,businessName}=req.body
 
   //  data validation
   if(!name||!email|| !password||!mobile||!address||!confirmPassword||!businessName){
@@ -48,17 +48,12 @@ res.json({data:newSeller,message:"signup success"})
 const sellerLogin=async(req,res,next)=>{
   try{
     // collecting sellerdata
-    const{email,password,confirmPassword}=req.body
+    const{email,password}=req.body
      //  data validation
-   if(!email|| !password||!confirmPassword){
+   if(!email|| !password){
    return res.status(400).json({message:"all fields required"})
   }
-
-  if(password!==confirmPassword){
-    return res.status(400).json({message:"password is not same"}) 
-  }
-
- // seller exist checking
+// seller exist checking
   const sellerExist=await sellerModel.findOne({email:email})
   if(!sellerExist){
     return res.status(404).json({message:" seller not found"})
@@ -76,7 +71,12 @@ const sellerLogin=async(req,res,next)=>{
 
   // generate token
   const token=generateToken(sellerExist._id,"seller")
-  res.cookie("token",token)
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: false, // Set to true in production with HTTPS
+    sameSite: "lax",
+  });
+
   // to remove password from sellerExist and send other details to frontend
   
   delete sellerExist._doc.password

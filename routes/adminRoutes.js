@@ -25,35 +25,6 @@ router.get("/check",authAdmin,checkAdmin)
 router.put("/deactivate",authAdmin,adminDeactivate)
 
 
-// get all item
-router.get("/getItem")
 
-// add item
-router.post("/add")
-
-// update item
-router.put("/update/:itemId")
-
-// delete item
-router.delete("/delete/:itemId")
-
-
-
-// order management
-
-// get all order
-router.get("/getOrder")
-
-// update a order
-router.put("/update/:orderId")
-
-// delete a order
-router.delete("/delete/:orderId")
-
-
-
-
-
-
- module.exports=router
+module.exports=router
 
