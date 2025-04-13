@@ -30,53 +30,86 @@ const getSingleItem=async(req,res,next)=>{
     }
 }
 
-const createItem=async(req,res,next)=>{
+const createItem = async (req, res, next) => {
     try {
-
-        // collect data
-        const { itemName,description, price,category,itemAvailability, restaurant,foodImage}=req.body
-        //   checking the data
-        if(! itemName ||!description || !price ||!category ||!itemAvailability||!restaurant){
-            return res.status(400).json({message:"all fields required"})
-           }
-
-           const cloudinaryPic = await cloudinary.uploader.upload(req.file.path);
-           console.log(cloudinaryPic)
-
-        //   creating a new item
-        const createItem=await menuModel.create({ itemName,description, price,category,itemAvailability,restaurant,foodImage:cloudinaryPic.url})
-        createItem.save()
-        
-        res.json({ success:true, data:createItem , message:" items created successfully" })
+      const {
+        itemName,
+        description,
+        price,
+        category,
+        itemAvailability,
+        restaurant,
+        foodImage,
+      } = req.body;
+  
+      if (!itemName || !description || !price || !category || !itemAvailability || !restaurant) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+  
+      let finalImageURL = foodImage;
+  
+      // ✅ If file is uploaded, upload to Cloudinary
+      if (req.file) {
+        const cloudinaryPic = await cloudinary.uploader.upload(req.file.path);
+        finalImageURL = cloudinaryPic.url;
+      }
+  
+      // ✅ Check if we have an image URL now
+      if (!finalImageURL) {
+        return res.status(400).json({ message: "Please upload a file or provide an image URL." });
+      }
+  
+      // ✅ Create the item
+      const newItem = await menuModel.create({
+        itemName,
+        description,
+        price,
+        category,
+        itemAvailability,
+        restaurant,
+        foodImage: finalImageURL,
+      });
+  
+      res.json({ success: true, data: newItem, message: "Item created successfully" });
+  
     } catch (error) {
-        res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
+      console.error("Create Item Error:", error); // <-- IMPORTANT
+      res.status(500).json({ message: error.message || "Internal Server Error" });
     }
-}
+  };
+  
 
-const updateItem=async(req,res,next)=>{
+const updateItem = async (req, res, next) => {
     try {
-        // collect the all data and the id of item that need to be updated
-        const { itemName,description, price,category,itemAvailability,restaurant,foodImage}=req.body
-             const {itemId}=req.params
-
-             
-           const cloudinaryPic = await cloudinary.uploader.upload(req.file.path);
-           console.log(cloudinaryPic)
-
-            //  updating the new value
-        const updateItem=await menuModel.findByIdAndUpdate(itemId,{ itemName,description, price,category,itemAvailability,restaurant,foodImage:cloudinaryPic.url},{new:true})
-        //    checking about the updation
-        if (!updateItem) {
-            return res.status(404).json({ success: false, message: "Item not found" });
-        }
-
-        res.json({ success: true, data: updateItem, message: "Updated item successfully" });
-        
-        
+      const { itemName, description, price, category, itemAvailability, restaurant } = req.body;
+      const { itemId } = req.params;
+  
+      let updateData = {
+        itemName,
+        description,
+        price,
+        category,
+        itemAvailability,
+        restaurant,
+      };
+  
+      if (req.file) {
+        const cloudinaryPic = await cloudinary.uploader.upload(req.file.path);
+        updateData.foodImage = cloudinaryPic.url;
+      }
+  
+      const updatedItem = await menuModel.findByIdAndUpdate(itemId, updateData, { new: true });
+  
+      if (!updatedItem) {
+        return res.status(404).json({ success: false, message: "Item not found" });
+      }
+  
+      res.json({ success: true, data: updatedItem, message: "Updated item successfully" });
     } catch (error) {
-        res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
+      res.status(error.statusCode || 500).json({ message: error.message || "internal server error" });
     }
-}
+  };
+  
 
 const deleteItem=async(req,res,next)=>{
     try {

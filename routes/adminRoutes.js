@@ -24,10 +24,6 @@ router.get("/check",authAdmin,checkAdmin)
 // deactivate admin
 router.put("/deactivate",authAdmin,adminDeactivate)
 
-// forgot password
-// change password
-
-// item management
 
 // get all item
 router.get("/getItem")
@@ -42,14 +38,6 @@ router.put("/update/:itemId")
 router.delete("/delete/:itemId")
 
 
-//  User Management
-
-// get all user 
-router.get("/getUser")
-
-// delete a user by id
-router.delete("/delete/:userId")
-
 
 // order management
 
@@ -62,17 +50,7 @@ router.put("/update/:orderId")
 // delete a order
 router.delete("/delete/:orderId")
 
-// restaurant management
 
-// add a new restaurant
-router.post("/create")
-
-// Update restaurant details
-router.put("/edit/:resId")
-
-// Delete a restaurant
-
-router.delete("/remove/:resId")
 
 
 

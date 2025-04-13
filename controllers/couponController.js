@@ -60,4 +60,16 @@ try {
 }
 }
 
-module.exports={createCoupon, getCoupon,updateCoupon,deleteCoupon}
+const getAllCouponsForAdmin = async (req, res, next) => {
+    try {
+      const coupons = await couponModel.find();
+      return res.status(200).json({ data: coupons, message: "All coupons fetched by admin successfully" });
+    } catch (error) {
+      res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+    }
+  };
+  
+  
+  
+
+module.exports={createCoupon, getCoupon,updateCoupon,deleteCoupon,getAllCouponsForAdmin}

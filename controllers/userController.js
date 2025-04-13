@@ -158,11 +158,46 @@ const checkUser = async (req, res, next) => {
     }
 };
 
+const DeleteUser = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const deletedUser = await userModel.findByIdAndDelete(userId);
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "User deleted successfully", data: deletedUser });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message || "Internal server error" });
+    }
+};
+
+const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await userModel.find().select("-password"); 
+        res.json({ data: users, message: "All users fetched successfully" });
+    } catch (error) {
+        console.log("Error fetching users:", error);
+        res.status(500).json({ message: error.message || "Internal server error" });
+    }
+};
+
+
+
 module.exports = { 
     userSignup, 
     userLogin, 
     userProfile, 
     updateUserProfile, 
     userLogout, 
-   checkUser 
+   checkUser,
+   DeleteUser,
+   getAllUsers 
 };

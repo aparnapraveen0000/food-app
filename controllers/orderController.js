@@ -46,6 +46,25 @@ const getOrder = async (req, res) => {
     }
   };
   
+ 
+
+// Get all orders for an admin
+const GetAdminOrders = async (req, res) => { 
+    try {
+        const orders = await orderModel.find();
+
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No orders found" });
+        }
+
+        res.status(200).json(orders);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+};
+
+
+
   
 
 // Get a single order by ID
@@ -64,21 +83,32 @@ const getSingleOrder= async (req, res,next) => {
     
 }
 
-// Update an order by ID
-const updateOrder=async (req, res,next) => {
+const updateOrder = async (req, res, next) => {
     try {
-        const {orderId}=req.params
-        const { userId, orderItems, discount,paymentStatus} = req.body
+        const { orderId } = req.params;
+        const { userId, orderItems, discount, paymentStatus, orderStatus } = req.body;  // Added orderStatus
 
-        const updatedOrder = await orderModel.findByIdAndUpdate(orderId,{ userId, orderItems, discount,paymentStatus},{ new: true })
+        // Log the request body to make sure the data is coming correctly
+        console.log("Order Update Data:", {
+            userId, orderItems, discount, paymentStatus, orderStatus
+        });
+
+        const updatedOrder = await orderModel.findByIdAndUpdate(
+            orderId,
+            { userId, orderItems, discount, paymentStatus, orderStatus }, // Ensure orderStatus is updated
+            { new: true }
+        );
+
         if (!updatedOrder) {
-            return res.status(404).json({ message: "Order not found" })
+            return res.status(404).json({ message: "Order not found" });
         }
-        res.status(200).json({ message: "Order updated successfully", data: updatedOrder })
+
+        res.status(200).json({ message: "Order updated successfully", data: updatedOrder });
     } catch (error) {
-        res.status(error.statusCode || 500).json({message:error.message||"internal server error"}) 
+        res.status(error.statusCode || 500).json({ message: error.message || "internal server error" });
     }
-}
+};
+
 
 // Delete an order by ID
 const deleteOrder= async (req, res,next) => {
@@ -98,4 +128,4 @@ const deleteOrder= async (req, res,next) => {
     
 }
 
-module.exports ={deleteOrder,updateOrder,getOrder,createOrder,getSingleOrder}
+module.exports ={deleteOrder,updateOrder,getOrder,GetAdminOrders,createOrder,getSingleOrder}
