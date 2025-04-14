@@ -14,25 +14,66 @@ try {
 }
 
 const postRestaurant=async(req,res,next)=>{
-    try {
-        //    collect all data
-        const{name,description,location, rating}=req.body
+  try {
+      //    collect all data
+      const{name,description,location, rating}=req.body
 
-            //  check all the fields are fuilled
-        if(!name||!description||!location?.address||!location?.city||!location?.state||!location?.pincode ||!rating){
-            res.status(400).json({message:"all fields are required"})
-        }
-        // adding new restaurant
-        const postRestaurant=await restaurantModel.create({name,description,location, rating})
-        res.status(201).json({data:postRestaurant,message:"restaurant successfully created"})
-        
-    } catch (error) {
-            res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
-        
+          //  check all the fields are fuilled
+      if(!name||!description||!location?.address||!location?.city||!location?.state||!location?.pincode ||!rating){
+          res.status(400).json({message:"all fields are required"})
+      }
+      // adding new restaurant
+      const postRestaurant=await restaurantModel.create({name,description,location, rating})
+      res.status(201).json({data:postRestaurant,message:"restaurant successfully created"})
+      
+  } catch (error) {
+          res.status(error.statusCode || 500).json({message:error.message||"internal server error"})
+      
+  }
+  }
+  // controllers/restaurantController.js
+
+
+
+const AddRestaurant = async (req, res, next) => {
+  try {
+    const sellerId = req.seller.id;
+    const { name, description, location, rating } = req.body;
+
+    if (
+      !name ||
+      !description ||
+      !location?.address ||
+      !location?.city ||
+      !location?.state ||
+      !location?.pincode ||
+      !rating
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
     }
-    }
+
+    const newRestaurant = await restaurantModel.create({
+      name,
+      description,
+      location,
+      rating,
+      sellerId,
+    });
+
+    res.status(201).json({
+      data: newRestaurant,
+      message: "Restaurant successfully created",
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message || "Internal server error" });
+  }
+};
 
 
+
+  
     const updateRestaurant=async(req,res,next)=>{
         try {
             //    collect all data
@@ -78,6 +119,96 @@ const postRestaurant=async(req,res,next)=>{
                 
             }
             }
+
+          // controller for  seller to update restaurant details
+            const EditRestaurant = async (req, res, next) => {
+              try {
+                const { name, description, location, rating } = req.body;
+                const { restaurantId } = req.params;
+                const sellerId = req.seller.id;
+            
+                // Find restaurant and check ownership
+                const restaurant = await restaurantModel.findById(restaurantId);
+            
+                if (!restaurant) {
+                  return res.status(404).json({ message: "Restaurant not found" });
+                }
+            
+                if (restaurant.sellerId.toString() !== sellerId) {
+                  return res.status(403).json({ message: "Unauthorized access" });
+                }
+            
+                const updatedRestaurant = await restaurantModel.findByIdAndUpdate(
+                  restaurantId,
+                  { name, description, location, rating },
+                  { new: true }
+                );
+            
+                res.status(200).json({
+                  data: updatedRestaurant,
+                  message: "Restaurant details updated successfully",
+                });
+              } catch (error) {
+                res
+                  .status(error.statusCode || 500)
+                  .json({ message: error.message || "Internal server error" });
+              }
+            };
+             // controller for  seller to delete restaurant details
+            const RemoveRestaurant = async (req, res, next) => {
+              try {
+                const { restaurantId } = req.params;
+                const sellerId = req.seller.id;
+            
+                const restaurant = await restaurantModel.findById(restaurantId);
+            
+                if (!restaurant) {
+                  return res.status(404).json({ message: "Restaurant not found" });
+                }
+            
+                if (restaurant.sellerId.toString() !== sellerId) {
+                  return res.status(403).json({ message: "Unauthorized access" });
+                }
+            
+                await restaurantModel.findByIdAndDelete(restaurantId);
+            
+                res.status(200).json({ message: "Restaurant deleted successfully" });
+              } catch (error) {
+                res
+                  .status(error.statusCode || 500)
+                  .json({ message: error.message || "Internal server error" });
+              }
+            };
+            // controller for  seller to get restaurant details
+            const AllRestaurant = async (req, res, next) => {
+              try {
+                const sellerId = req.seller.id;
+            
+                // Fetch only restaurants that belong to the logged-in seller
+                const sellerRestaurants = await restaurantModel
+                  .find({ sellerId })
+                  .select("name location rating createdAt updatedAt") // Include only what you want
+                  .sort({ createdAt: -1 }); // Optional: sort by newest first
+            
+                if (!sellerRestaurants || sellerRestaurants.length === 0) {
+                  return res.status(200).json({
+                    data: [],
+                    message: "No restaurants found for this seller.",
+                  });
+                }
+            
+                res.status(200).json({
+                  data: sellerRestaurants,
+                  message: "Seller's restaurants fetched successfully",
+                });
+              } catch (error) {
+                res.status(error.statusCode || 500).json({
+                  message: error.message || "Internal server error",
+                });
+              }
+            };
+            
+            
 
             const getMenuOfRestaurant=async(req,res,next)=>{
                 try {
@@ -131,4 +262,4 @@ const postRestaurant=async(req,res,next)=>{
                
                 
 
-module.exports={getRestaurant,postRestaurant, updateRestaurant, deleteRestaurant, getMenuOfRestaurant, getRestaurantsByMenuItem }
+module.exports={getRestaurant,postRestaurant,updateRestaurant,RemoveRestaurant,deleteRestaurant,EditRestaurant,getMenuOfRestaurant,AddRestaurant,AllRestaurant,getRestaurantsByMenuItem }
